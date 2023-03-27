@@ -124,26 +124,26 @@ const columns = [
 ];
 
 const dataSource = [
-  {
-    key: "4",
-    task: "Task 4",
-    status: "done",
-  },
-  {
-    key: "3",
-    task: "Task 3",
-    status: "done",
-  },
-  {
-    key: "2",
-    task: "Task 2",
-    status: "processing",
-  },
-  {
-    key: "1",
-    task: "Task 1",
-    status: "to do",
-  },
+  // {
+  //   key: "4",
+  //   task: "Task 4",
+  //   status: "done",
+  // },
+  // {
+  //   key: "3",
+  //   task: "Task 3",
+  //   status: "done",
+  // },
+  // {
+  //   key: "2",
+  //   task: "Task 2",
+  //   status: "processing",
+  // },
+  // {
+  //   key: "1",
+  //   task: "Task 1",
+  //   status: "to do",
+  // },
 ];
 
 export default defineComponent({
@@ -152,6 +152,7 @@ export default defineComponent({
   },
   name: "IndexPage",
   data() {
+    // this.dataSource = JSON.parse(localStorage.getItem("array") || "[]");
     this.cacheData = dataSource.map((item) => ({ ...item }));
     return {
       dataSource,
@@ -164,13 +165,11 @@ export default defineComponent({
     };
   },
   created() {
-    const jsonDataSource = JSON.stringify(this.dataSource);
-    this.dataSource.forEach((element) => {
-      // const jsonElement = JSON.parse(JSON.stringify(element));
-      const jsonElement = JSON.stringify(JSON.parse(JSON.stringify(element)));
-      console.log(jsonElement);
-      localStorage.setItem(element.key, jsonElement);
-    });
+    this.dataSource = JSON.parse(localStorage.getItem("array") || "[]");
+
+    // const jsonDataSource = JSON.stringify(this.dataSource);
+    // localStorage.setItem("array", jsonDataSource);
+    // console.log(JSON.parse(localStorage.getItem("array") || "[]"));
   },
   computed: {},
   methods: {
@@ -178,11 +177,8 @@ export default defineComponent({
       // const newData
     },
     updateLocalStorage(array) {
-      array.forEach((element) => {
-        const jsonElement = JSON.stringify(JSON.parse(JSON.stringify(element)));
-        console.log(jsonElement);
-        localStorage.setItem(element.key, jsonElement);
-      });
+      const jsonArray = JSON.stringify(array);
+      localStorage.setItem("array", jsonArray);
     },
     handleChange(value, key, column) {
       console.log(value);
@@ -217,6 +213,7 @@ export default defineComponent({
         Object.assign(targetCache, target);
         this.cacheData = newCacheData;
       }
+      target.editable=false;
       this.editingKey = "";
       this.choiceSelected = "";
       this.updateLocalStorage(this.dataSource);
