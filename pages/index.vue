@@ -44,7 +44,13 @@
                 </a-select-option>
               </a-select>
               <template v-else>
-                {{ text }}
+                <p
+                  :class="{
+                    strikethrough: isStyleCheck(record.key, col, text),
+                  }"
+                >
+                  {{ text }}
+                </p>
               </template>
             </div>
           </template>
@@ -74,20 +80,13 @@
               >
                 <a>
                   <a-icon
-                  theme="twoTone" two-tone-color="#eb2f96"
-                  style="font-size: 1.2rem"
-                  type="delete"
-                />
+                    theme="twoTone"
+                    two-tone-color="#eb2f96"
+                    style="font-size: 1.2rem"
+                    type="delete"
+                  />
                 </a>
               </a-popconfirm>
-              <!-- <span>
-                <a-icon
-                  theme="twoTone" two-tone-color="#eb2f96"
-                  style="font-size: 1.2rem"
-                  type="delete"
-                  @click="() => onDelete(record.key)"
-                />
-              </span> -->
             </div>
           </template>
         </a-table>
@@ -126,22 +125,22 @@ const columns = [
 
 const dataSource = [
   {
-    key: "1",
+    key: "4",
     task: "Task 4",
     status: "done",
   },
   {
-    key: "2",
+    key: "3",
     task: "Task 3",
     status: "done",
   },
   {
-    key: "3",
+    key: "2",
     task: "Task 2",
     status: "processing",
   },
   {
-    key: "4",
+    key: "1",
     task: "Task 1",
     status: "to do",
   },
@@ -164,7 +163,27 @@ export default defineComponent({
       count: 5,
     };
   },
+  created() {
+    const jsonDataSource = JSON.stringify(this.dataSource);
+    this.dataSource.forEach((element) => {
+      // const jsonElement = JSON.parse(JSON.stringify(element));
+      const jsonElement = JSON.stringify(JSON.parse(JSON.stringify(element)));
+      console.log(jsonElement);
+      localStorage.setItem(element.key, jsonElement);
+    });
+  },
+  computed: {},
   methods: {
+    isStyleCheck(key, column, text) {
+      // const newData
+    },
+    updateLocalStorage(array) {
+      array.forEach((element) => {
+        const jsonElement = JSON.stringify(JSON.parse(JSON.stringify(element)));
+        console.log(jsonElement);
+        localStorage.setItem(element.key, jsonElement);
+      });
+    },
     handleChange(value, key, column) {
       console.log(value);
       const newData = [...this.dataSource];
@@ -176,11 +195,6 @@ export default defineComponent({
         this.dataSource = newData;
       }
     },
-
-    onChoice(value, key, column) {
-      console.log(`selected ${value}`);
-    },
-
     edit(key) {
       console.log(key);
       const newData = [...this.dataSource];
@@ -205,6 +219,7 @@ export default defineComponent({
       }
       this.editingKey = "";
       this.choiceSelected = "";
+      this.updateLocalStorage(this.dataSource);
     },
     onDelete(key) {
       const newData = this.dataSource;
@@ -215,6 +230,7 @@ export default defineComponent({
       this.cacheData = dataSource.map((item) => ({ ...item }));
       this.editingKey = "";
       console.log(this.dataSource);
+      this.updateLocalStorage(this.dataSource);
     },
     cancel(key) {
       const newData = [...this.dataSource];
@@ -245,6 +261,7 @@ export default defineComponent({
       } else {
         console.log("yeyeyeye");
       }
+      this.updateLocalStorage(this.dataSource);
     },
   },
 });
@@ -265,5 +282,9 @@ export default defineComponent({
   display: flex;
   justify-content: center;
   margin-top: 1rem;
+}
+
+.strikethrough {
+  text-decoration: line-through;
 }
 </style>
