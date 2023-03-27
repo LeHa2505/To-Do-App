@@ -124,26 +124,6 @@ const columns = [
 ];
 
 const dataSource = [
-  {
-    key: "4",
-    task: "Task 4",
-    status: "done",
-  },
-  {
-    key: "3",
-    task: "Task 3",
-    status: "done",
-  },
-  {
-    key: "2",
-    task: "Task 2",
-    status: "processing",
-  },
-  {
-    key: "1",
-    task: "Task 1",
-    status: "to do",
-  },
 ];
 
 export default defineComponent({
