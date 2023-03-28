@@ -161,7 +161,7 @@ export default defineComponent({
       task: "",
       choiceList: ["to do", "done", "processing"],
       choiceSelected: "",
-      count: 5,
+      count: 0,
     };
   },
   created() {
@@ -182,9 +182,7 @@ export default defineComponent({
     handleChange(value, key, column) {
       console.log(value);
       const newData = [...this.dataSource];
-      console.log(newData);
       const target = newData.find((item) => key === item.key);
-      console.log(target);
       if (target) {
         target[column] = value;
         this.dataSource = newData;
@@ -207,7 +205,6 @@ export default defineComponent({
       const newCacheData = [...this.cacheData];
       const target = newData.find((item) => key === item.key);
       const targetCache = newCacheData.find((item) => key === item.key);
-      console.log(key);
       if (target && targetCache) {
         delete target.editable;
         this.dataSource = newData;
@@ -246,9 +243,8 @@ export default defineComponent({
     },
     handleAdd() {
       if (this.task) {
-        const count = this.dataSource.length;
         const newData = {
-          key: count + 1,
+          key: this.count + 1,
           task: this.task,
           status: this.choiceList[0],
         };
