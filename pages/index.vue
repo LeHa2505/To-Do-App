@@ -66,7 +66,7 @@
                 </a-popconfirm>
               </span>
               <span v-else>
-                <a :disabled="editingKey !== ''" @click="() => edit(record.key)"
+                <a :disabled="editingKey !== ''" @click="() => edit(record.key, record.status)"
                   ><a-icon type="edit" theme="filled" style="font-size: 1.2rem"
                 /></a>
               </span>
@@ -190,8 +190,10 @@ export default defineComponent({
         this.dataSource = newData;
       }
     },
-    edit(key) {
+    edit(key, text) {
       console.log(key);
+      this.choiceSelected = text;
+      console.log(this.choiceSelected);
       const newData = [...this.dataSource];
       const target = newData.find((item) => key === item.key);
       this.editingKey = key;
