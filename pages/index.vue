@@ -33,9 +33,9 @@
                 v-else-if="record.editable && col === 'status'"
                 v-model="choiceSelected"
                 style="width: 100%"
-                @change="(e) => handleChange(choiceSelected, record.key, col)"
               >
                 <a-select-option
+                @change="(e) => handleChange(e.target.value, record.key, col)"
                   v-for="(text, index) in choiceList"
                   :key="index"
                   :value="text"
@@ -66,7 +66,9 @@
                 </a-popconfirm>
               </span>
               <span v-else>
-                <a :disabled="editingKey !== ''" @click="() => edit(record.key, record.status)"
+                <a
+                  :disabled="editingKey !== ''"
+                  @click="() => edit(record.key)"
                   ><a-icon type="edit" theme="filled" style="font-size: 1.2rem"
                 /></a>
               </span>
@@ -180,22 +182,19 @@ export default defineComponent({
       localStorage.setItem("array", jsonArray);
     },
     handleChange(value, key, column) {
-      console.log(value);
       const newData = [...this.dataSource];
-      console.log(newData);
       const target = newData.find((item) => key === item.key);
-      console.log(target);
       if (target) {
         target[column] = value;
         this.dataSource = newData;
       }
+      this.updateLocalStorage(this.dataSource)
     },
-    edit(key, text) {
-      console.log(key);
-      this.choiceSelected = text;
-      console.log(this.choiceSelected);
+    edit(key) {
+      // this.choiceSelected = text;
       const newData = [...this.dataSource];
       const target = newData.find((item) => key === item.key);
+      console.log(this.editingKey);
       this.editingKey = key;
       if (target) {
         target.editable = true;
@@ -207,14 +206,14 @@ export default defineComponent({
       const newCacheData = [...this.cacheData];
       const target = newData.find((item) => key === item.key);
       const targetCache = newCacheData.find((item) => key === item.key);
-      console.log(key);
       if (target && targetCache) {
         delete target.editable;
         this.dataSource = newData;
         Object.assign(targetCache, target);
         this.cacheData = newCacheData;
       }
-      target.editable=false;
+      target.editable = false;
+      console.log(this.editingKey);
       this.editingKey = "";
       this.choiceSelected = "";
       this.updateLocalStorage(this.dataSource);
@@ -227,7 +226,6 @@ export default defineComponent({
       this.dataSource = newDataSource;
       this.cacheData = dataSource.map((item) => ({ ...item }));
       this.editingKey = "";
-      console.log(this.dataSource);
       this.updateLocalStorage(this.dataSource);
     },
     cancel(key) {
@@ -246,9 +244,8 @@ export default defineComponent({
     },
     handleAdd() {
       if (this.task) {
-        const count = this.dataSource.length;
         const newData = {
-          key: count + 1,
+          key: this.count + 1,
           task: this.task,
           status: this.choiceList[0],
         };
@@ -256,8 +253,6 @@ export default defineComponent({
         this.cacheData = dataSource.map((item) => ({ ...item }));
         this.task = "";
         this.count = this.count + 1;
-      } else {
-        console.log("yeyeyeye");
       }
       this.updateLocalStorage(this.dataSource);
     },
