@@ -13,35 +13,26 @@
             >Submit</a-button
           >
         </a-input-group>
-
         <div
           style="
-            margin-top: 1rem;
-            display: flex;
+            margin-top: 1.5rem;
             justify-content: space-between;
             width: 50%;
           "
         >
           <a-input-search
-            v-ant-ref="(c) => (searchInput = c)"
-            :value="selectedKeys"
-            @change="
-              (e) => setSelectedKeys(e.target.value ? [e.target.value] : [])
-            "
-            @pressEnter="
-              () => handleSearch(selectedKeys, confirm, column.dataIndex)
-            "
-            placeholder="Search Task"
-            enter-button
+            placeholder="input search text"
+            style="width: 200px"
+            v-model="search"
+            @search="onSearch"
           />
-          <br /><br />
         </div>
       </div>
     </div>
 
     <div class="task-list">
       <div style="width: 50%">
-        <a-table :columns="columns" :data-source="dataSource" bordered>
+        <a-table :columns="columns" :data-source="changedData" bordered>
           <template
             v-for="col in ['task', 'status']"
             :slot="col"
@@ -133,15 +124,6 @@ const columns = [
     title: "Status",
     dataIndex: "status",
     scopedSlots: { customRender: "status" },
-    onFilter: (value, record) =>
-      record.name.toString().toLowerCase().includes(value.toLowerCase()),
-    onFilterDropdownVisibleChange: (visible) => {
-      if (visible) {
-        setTimeout(() => {
-          this.searchInput.focus();
-        }, 0);
-      }
-    },
   },
   {
     title: "Edit",
@@ -166,7 +148,6 @@ export default defineComponent({
     // this.dataSource = JSON.parse(localStorage.getItem("array") || "[]");
     this.cacheData = dataSource.map((item) => ({ ...item }));
     return {
-      dataSource,
       columns,
       editingKey: "",
       task: "",
@@ -174,22 +155,34 @@ export default defineComponent({
       choiceSelected: "",
       usedKeys: [],
       textInput: "",
+      search: "",
+      changedData: [], // changed data after filter 
+      dataSource: [], // origin data
     };
   },
-  created() {
-    this.dataSource = JSON.parse(localStorage.getItem("array") || "[]");
+  mounted() {
+    this.dataSource = JSON.parse(localStorage.getItem("array") || "[]")
+    this.changedData = this.dataSource
   },
-  computed: {},
+  watch: {
+    search(newData) {
+      if (newData.length !== 0) {
+        this.onSearch(newData);
+      }
+      else {
+        // get origin data
+        this.changedData = this.dataSource
+      }
+    }
+  },
   methods: {
-    handleSearch(selectedKeys, confirm, dataIndex) {
-      confirm();
-      this.searchText = selectedKeys[0];
-      this.searchedColumn = dataIndex;
-    },
-
-    handleReset(clearFilters) {
-      clearFilters();
-      this.searchText = "";
+    onSearch(value) {
+      const searchData = this.dataSource.filter((row) => {
+        return row["task"].toLowerCase().includes(value.toLowerCase());
+      });
+      this.changedData = searchData
+      // this.dataSource = searchData;
+      // this.cacheData = newData.map((item) => ({ ...item }));
     },
     createUniqueKey() {
       let key;
