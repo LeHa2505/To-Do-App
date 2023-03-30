@@ -27,7 +27,7 @@
                 v-if="record.editable && col === 'task'"
                 style="margin: -5px 0"
                 :value="text"
-                @change="(e) => handleChange(e.target.value, record.key, col)"
+                @change="(e)=>handleChange(e.target.value, record.key, col)"
               />
               <a-select
                 v-else-if="record.editable && col === 'status'"
@@ -44,11 +44,7 @@
                 </a-select-option>
               </a-select>
               <template v-else>
-                <p
-                  :class="{
-                    strikethrough: isStyleCheck(record.key, col, text),
-                  }"
-                >
+                <p>
                   {{ text }}
                 </p>
               </template>
@@ -66,7 +62,9 @@
                 </a-popconfirm>
               </span>
               <span v-else>
-                <a :disabled="editingKey !== ''" @click="() => edit(record.key, record.status)"
+                <a
+                  :disabled="editingKey !== ''"
+                  @click="() => edit(record.key, record.status)"
                   ><a-icon type="edit" theme="filled" style="font-size: 1.2rem"
                 /></a>
               </span>
@@ -161,7 +159,7 @@ export default defineComponent({
       task: "",
       choiceList: ["to do", "done", "processing"],
       choiceSelected: "",
-      count: 0,
+      usedKeys :[1, 2, 3],
     };
   },
   created() {
@@ -175,57 +173,25 @@ export default defineComponent({
     isStyleCheck(key, column, text) {
       // const newData
     },
+    createUniqueKey() {
+      let key;
+      do {
+        key = Math.floor(Math.random() * 1000) + 1; // Tạo một số ngẫu nhiên từ 1 đến 100
+      } while (this.usedKeys.includes(key)); // Lặp lại cho đến khi tạo được key mới chưa được sử dụng
+      this.usedKeys.push(key);
+      return key;
+    },
     updateLocalStorage(array) {
       const jsonArray = JSON.stringify(array);
       localStorage.setItem("array", jsonArray);
     },
     handleChange(value, key, column) {
-      console.log(value);
       const newData = [...this.dataSource];
       const target = newData.find((item) => key === item.key);
       if (target) {
         target[column] = value;
         this.dataSource = newData;
       }
-    },
-    edit(key, text) {
-      console.log(key);
-      this.choiceSelected = text;
-      console.log(this.choiceSelected);
-      const newData = [...this.dataSource];
-      const target = newData.find((item) => key === item.key);
-      this.editingKey = key;
-      if (target) {
-        target.editable = true;
-        this.dataSource = newData;
-      }
-    },
-    save(key) {
-      const newData = [...this.dataSource];
-      const newCacheData = [...this.cacheData];
-      const target = newData.find((item) => key === item.key);
-      const targetCache = newCacheData.find((item) => key === item.key);
-      if (target && targetCache) {
-        delete target.editable;
-        this.dataSource = newData;
-        Object.assign(targetCache, target);
-        this.cacheData = newCacheData;
-      }
-      target.editable=false;
-      this.editingKey = "";
-      this.choiceSelected = "";
-      this.updateLocalStorage(this.dataSource);
-    },
-    onDelete(key) {
-      const newData = this.dataSource;
-      const newDataSource = newData.filter((object) => {
-        return object.key !== key;
-      });
-      this.dataSource = newDataSource;
-      this.cacheData = dataSource.map((item) => ({ ...item }));
-      this.editingKey = "";
-      console.log(this.dataSource);
-      this.updateLocalStorage(this.dataSource);
     },
     cancel(key) {
       const newData = [...this.dataSource];
@@ -241,19 +207,60 @@ export default defineComponent({
         this.choiceSelected = "";
       }
     },
+    edit(key, text) {
+      this.choiceSelected = text;
+      const newData = [...this.dataSource];
+      console.log("===1====");
+      console.log(newData);
+      const target = newData.find((item) => key === item.key);
+      this.editingKey = key;
+      if (target) {
+        target.editable = true;
+        this.dataSource = newData;
+        console.log(newData);
+      }
+    },
+    save(key) {
+      const newData = [...this.dataSource];
+      console.log("====2=====");
+      console.log(newData);
+      const newCacheData = [...this.cacheData];
+      console.log("====3=====");
+      console.log(newCacheData);
+      const target = newData.find((item) => key === item.key);
+      const targetCache = newCacheData.find((item) => key === item.key);
+      if (target && targetCache) {
+        delete target.editable;
+        this.dataSource = newData;
+        Object.assign(targetCache, target);
+        this.cacheData = newCacheData;
+      }
+      target.editable = false; 
+      this.editingKey = "";
+      this.choiceSelected = "";
+      this.updateLocalStorage(this.dataSource);
+    },
+    onDelete(key) {
+      const newData = this.dataSource;
+      const newDataSource = newData.filter((object) => {
+        return object.key !== key;
+      });
+      this.dataSource = newDataSource;
+      this.cacheData = dataSource.map((item) => ({ ...item }));
+      this.editingKey = "";
+      this.updateLocalStorage(this.dataSource);
+    },
     handleAdd() {
       if (this.task) {
         const newData = {
-          key: this.count + 1,
+          key: this.createUniqueKey(),
           task: this.task,
           status: this.choiceList[0],
         };
         this.dataSource.unshift(newData);
         this.cacheData = dataSource.map((item) => ({ ...item }));
         this.task = "";
-        this.count = this.count + 1;
-      } else {
-        console.log("yeyeyeye");
+        // this.count = this.count + 1;
       }
       this.updateLocalStorage(this.dataSource);
     },
