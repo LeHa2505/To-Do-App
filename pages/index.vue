@@ -27,7 +27,7 @@
                 v-if="record.editable && col === 'task'"
                 style="margin: -5px 0"
                 v-model="textInput"
-                @change="(e)=>handleChange(textInput, record.key, col)"
+                @change="(e) => handleChange(textInput, record.key, col)"
               />
               <a-select
                 v-else-if="record.editable && col === 'status'"
@@ -159,8 +159,8 @@ export default defineComponent({
       task: "",
       choiceList: ["to do", "done", "processing"],
       choiceSelected: "",
-      usedKeys :[],
-      textInput: ''
+      usedKeys: [],
+      textInput: "",
     };
   },
   created() {
@@ -208,7 +208,7 @@ export default defineComponent({
         delete target.editable;
         this.dataSource = newData;
         this.choiceSelected = "";
-        this.dataSource = JSON.parse(localStorage.getItem("array") || "[]")
+        this.dataSource = JSON.parse(localStorage.getItem("array") || "[]");
       }
     },
     edit(key, text, task) {
@@ -237,6 +237,7 @@ export default defineComponent({
       this.editingKey = "";
       this.choiceSelected = "";
       this.updateLocalStorage(this.dataSource);
+      this.dataSource = JSON.parse(localStorage.getItem("array") || "[]");
     },
     onDelete(key) {
       const newData = this.dataSource;
@@ -254,6 +255,7 @@ export default defineComponent({
           key: this.createUniqueKey(),
           task: this.task,
           status: this.choiceList[0],
+          editable: false,
         };
         this.dataSource.unshift(newData);
         this.cacheData = dataSource.map((item) => ({ ...item }));
