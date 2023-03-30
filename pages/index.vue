@@ -1,17 +1,42 @@
 <template>
   <div>
     <h1 style="text-align: center">NUXT TO DO APP</h1>
-    <div class="block-task">
-      <a-input-group compact style="width: 50%">
-        <a-input
-          v-model="task"
-          style="width: calc(100% - 100px)"
-          placeholder="Enter task ..."
-        />
-        <a-button style="width: 100px" type="primary" @click="handleAdd"
-          >Submit</a-button
+    <div style="display: flex; justify-content: center">
+      <div class="block-task">
+        <a-input-group compact>
+          <a-input
+            v-model="task"
+            style="width: calc(100% - 100px)"
+            placeholder="Enter task ..."
+          />
+          <a-button style="width: 100px" type="primary" @click="handleAdd"
+            >Submit</a-button
+          >
+        </a-input-group>
+
+        <div
+          style="
+            margin-top: 1rem;
+            display: flex;
+            justify-content: space-between;
+            width: 50%;
+          "
         >
-      </a-input-group>
+          <a-input-search
+            v-ant-ref="(c) => (searchInput = c)"
+            :value="selectedKeys"
+            @change="
+              (e) => setSelectedKeys(e.target.value ? [e.target.value] : [])
+            "
+            @pressEnter="
+              () => handleSearch(selectedKeys, confirm, column.dataIndex)
+            "
+            placeholder="Search Task"
+            enter-button
+          />
+          <br /><br />
+        </div>
+      </div>
     </div>
 
     <div class="task-list">
@@ -108,6 +133,15 @@ const columns = [
     title: "Status",
     dataIndex: "status",
     scopedSlots: { customRender: "status" },
+    onFilter: (value, record) =>
+      record.name.toString().toLowerCase().includes(value.toLowerCase()),
+    onFilterDropdownVisibleChange: (visible) => {
+      if (visible) {
+        setTimeout(() => {
+          this.searchInput.focus();
+        }, 0);
+      }
+    },
   },
   {
     title: "Edit",
@@ -121,28 +155,7 @@ const columns = [
   },
 ];
 
-const dataSource = [
-  // {
-  //   key: "4",
-  //   task: "Task 4",
-  //   status: "done",
-  // },
-  // {
-  //   key: "3",
-  //   task: "Task 3",
-  //   status: "done",
-  // },
-  // {
-  //   key: "2",
-  //   task: "Task 2",
-  //   status: "processing",
-  // },
-  // {
-  //   key: "1",
-  //   task: "Task 1",
-  //   status: "to do",
-  // },
-];
+const dataSource = [];
 
 export default defineComponent({
   components: {
@@ -168,8 +181,15 @@ export default defineComponent({
   },
   computed: {},
   methods: {
-    isStyleCheck(key, column, text) {
-      // const newData
+    handleSearch(selectedKeys, confirm, dataIndex) {
+      confirm();
+      this.searchText = selectedKeys[0];
+      this.searchedColumn = dataIndex;
+    },
+
+    handleReset(clearFilters) {
+      clearFilters();
+      this.searchText = "";
     },
     createUniqueKey() {
       let key;
@@ -273,6 +293,9 @@ export default defineComponent({
   display: flex;
   justify-content: center;
   margin-top: 1rem;
+  flex-direction: column;
+  /* align-items: center; */
+  width: 50%;
 }
 
 .task-list {
