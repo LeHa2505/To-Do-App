@@ -21,7 +21,7 @@
           "
         >
           <a-input-search
-            placeholder="input search text"
+            placeholder="Search task..."
             style="width: 200px"
             v-model="search"
             @search="onSearch"
