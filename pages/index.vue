@@ -165,9 +165,6 @@ export default defineComponent({
   },
   created() {
     this.dataSource = JSON.parse(localStorage.getItem("array") || "[]");
-    // const jsonDataSource = JSON.stringify(this.dataSource);
-    // localStorage.setItem("array", jsonDataSource);
-    // console.log(JSON.parse(localStorage.getItem("array") || "[]"));
   },
   computed: {},
   methods: {
@@ -177,8 +174,8 @@ export default defineComponent({
     createUniqueKey() {
       let key;
       do {
-        key = Math.floor(Math.random() * 1000) + 1; // Tạo một số ngẫu nhiên từ 1 đến 100
-      } while (this.usedKeys.includes(key)); // Lặp lại cho đến khi tạo được key mới chưa được sử dụng
+        key = Math.floor(Math.random() * 1000) + 1;
+      } while (this.usedKeys.includes(key));
       this.usedKeys.push(key);
       return key;
     },
@@ -260,7 +257,6 @@ export default defineComponent({
         this.dataSource.unshift(newData);
         this.cacheData = dataSource.map((item) => ({ ...item }));
         this.task = "";
-        // this.count = this.count + 1;
       }
       this.updateLocalStorage(this.dataSource);
     },
