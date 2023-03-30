@@ -26,8 +26,8 @@
               <a-input
                 v-if="record.editable && col === 'task'"
                 style="margin: -5px 0"
-                :value="text"
-                @change="(e)=>handleChange(e.target.value, record.key, col)"
+                v-model="textInput"
+                @change="(e)=>handleChange(textInput, record.key, col)"
               />
               <a-select
                 v-else-if="record.editable && col === 'status'"
@@ -64,7 +64,7 @@
               <span v-else>
                 <a
                   :disabled="editingKey !== ''"
-                  @click="() => edit(record.key, record.status)"
+                  @click="() => edit(record.key, record.status, record.task)"
                   ><a-icon type="edit" theme="filled" style="font-size: 1.2rem"
                 /></a>
               </span>
@@ -159,7 +159,8 @@ export default defineComponent({
       task: "",
       choiceList: ["to do", "done", "processing"],
       choiceSelected: "",
-      usedKeys :[1, 2, 3],
+      usedKeys :[],
+      textInput: ''
     };
   },
   created() {
@@ -192,10 +193,12 @@ export default defineComponent({
         target[column] = value;
         this.dataSource = newData;
       }
+      console.log(value + key + column);
     },
     cancel(key) {
       const newData = [...this.dataSource];
       const target = newData.find((item) => key === item.key);
+      console.log(target);
       this.editingKey = "";
       if (target) {
         Object.assign(
@@ -205,37 +208,32 @@ export default defineComponent({
         delete target.editable;
         this.dataSource = newData;
         this.choiceSelected = "";
+        this.dataSource = JSON.parse(localStorage.getItem("array") || "[]")
       }
     },
-    edit(key, text) {
+    edit(key, text, task) {
       this.choiceSelected = text;
+      this.textInput = task;
       const newData = [...this.dataSource];
-      console.log("===1====");
-      console.log(newData);
       const target = newData.find((item) => key === item.key);
       this.editingKey = key;
       if (target) {
         target.editable = true;
         this.dataSource = newData;
-        console.log(newData);
       }
     },
     save(key) {
       const newData = [...this.dataSource];
-      console.log("====2=====");
-      console.log(newData);
       const newCacheData = [...this.cacheData];
-      console.log("====3=====");
-      console.log(newCacheData);
       const target = newData.find((item) => key === item.key);
       const targetCache = newCacheData.find((item) => key === item.key);
       if (target && targetCache) {
-        delete target.editable;
         this.dataSource = newData;
         Object.assign(targetCache, target);
         this.cacheData = newCacheData;
       }
-      target.editable = false; 
+      target.editable = false;
+      console.log(target.editable);
       this.editingKey = "";
       this.choiceSelected = "";
       this.updateLocalStorage(this.dataSource);
