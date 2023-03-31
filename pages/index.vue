@@ -156,7 +156,7 @@ const columns = [
   },
 ];
 
-const dataSource = [];
+var dataSource = [];
 
 export default defineComponent({
   components: {
@@ -179,11 +179,12 @@ export default defineComponent({
     };
   },
   created() {
-    // dataSource = Object.values(this.$store.state.taskList);
+    dataSource = Object.values(this.$store.state.taskList);
+    console.log(dataSource);
   },
   mounted() {
-    this.dataSource = JSON.parse(localStorage.getItem("array") || "[]");
-    this.changedData = this.dataSource;
+    // this.dataSource = JSON.parse(localStorage.getItem("array") || "[]");
+    // this.changedData = this.dataSource;
   },
   watch: {
     search(newData) {
@@ -286,6 +287,7 @@ export default defineComponent({
           editable: false,
         };
         this.$store.commit("addTaskList", newData);
+        dataSource = Object.values(this.$store.state.taskList);
         // this.dataSource.unshift(newData);
         this.cacheData = this.dataSource.map((item) => ({ ...item }));
         this.task = "";
