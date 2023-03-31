@@ -14,11 +14,7 @@
           >
         </a-input-group>
         <div
-          style="
-            margin-top: 1.5rem;
-            justify-content: space-between;
-            width: 50%;
-          "
+          style="margin-top: 1.5rem; justify-content: space-between; width: 50%"
         >
           <a-input-search
             placeholder="Search task..."
@@ -33,6 +29,23 @@
     <div class="task-list">
       <div style="width: 50%">
         <a-table :columns="columns" :data-source="changedData" bordered>
+          <!-- <a slot="task" slot-scope="text">{{ text }}</a>
+    <span slot="customTitle"><a-icon type="smile-o" /> Name</span>
+          <template #customTitle> <a-icon type="smile-o" />Name nnvvbvb</template> -->
+          <!-- <div slot="filterDropdown" slot-scope="{ column }" style="padding: 8px">
+            <a-input-search
+              :placeholder="`Search ${column.dataIndex}`"
+              v-model="search"
+              :style="{ color: filtered ? '#108ee9' : undefined }"
+              @search="onSearch"
+            />
+            <a-icon
+              slot="filterIcon"
+              slot-scope="filtered"
+              type="search"
+              :style="{ color: filtered ? '#108ee9' : undefined }"
+            />
+          </div> -->
           <template
             v-for="col in ['task', 'status']"
             :slot="col"
@@ -112,13 +125,19 @@
 <script>
 import CopyOutlined from "@ant-design/icons-vue";
 import { computed, defineComponent, reactive, ref } from "vue";
+import { mapState, mapGetters, mapActions, mapMutations } from "vuex";
 
 const columns = [
   {
     title: "Task",
     dataIndex: "task",
     width: "40%",
-    scopedSlots: { customRender: "task" },
+    slots: { title: "customTitle" },
+    scopedSlots: {
+      filterDropdown: "filterDropdown",
+      filterIcon: "filterIcon",
+      customRender: "task",
+    },
   },
   {
     title: "Status",
@@ -145,7 +164,6 @@ export default defineComponent({
   },
   name: "IndexPage",
   data() {
-    // this.dataSource = JSON.parse(localStorage.getItem("array") || "[]");
     this.cacheData = dataSource.map((item) => ({ ...item }));
     return {
       columns,
@@ -156,33 +174,33 @@ export default defineComponent({
       usedKeys: [],
       textInput: "",
       search: "",
-      changedData: [], // changed data after filter 
+      changedData: [], // changed data after filter
       dataSource: [], // origin data
     };
   },
+  created() {
+    // dataSource = Object.values(this.$store.state.taskList);
+  },
   mounted() {
-    this.dataSource = JSON.parse(localStorage.getItem("array") || "[]")
-    this.changedData = this.dataSource
+    this.dataSource = JSON.parse(localStorage.getItem("array") || "[]");
+    this.changedData = this.dataSource;
   },
   watch: {
     search(newData) {
       if (newData.length !== 0) {
         this.onSearch(newData);
-      }
-      else {
+      } else {
         // get origin data
-        this.changedData = this.dataSource
+        this.changedData = this.dataSource;
       }
-    }
+    },
   },
   methods: {
     onSearch(value) {
       const searchData = this.dataSource.filter((row) => {
         return row["task"].toLowerCase().includes(value.toLowerCase());
       });
-      this.changedData = searchData
-      // this.dataSource = searchData;
-      // this.cacheData = newData.map((item) => ({ ...item }));
+      this.changedData = searchData;
     },
     createUniqueKey() {
       let key;
@@ -267,11 +285,12 @@ export default defineComponent({
           status: this.choiceList[0],
           editable: false,
         };
-        this.dataSource.unshift(newData);
-        this.cacheData = dataSource.map((item) => ({ ...item }));
+        this.$store.commit("addTaskList", newData);
+        // this.dataSource.unshift(newData);
+        this.cacheData = this.dataSource.map((item) => ({ ...item }));
         this.task = "";
       }
-      this.updateLocalStorage(this.dataSource);
+      // this.updateLocalStorage(this.dataSource);
     },
   },
 });
@@ -287,7 +306,6 @@ export default defineComponent({
   justify-content: center;
   margin-top: 1rem;
   flex-direction: column;
-  /* align-items: center; */
   width: 50%;
 }
 
