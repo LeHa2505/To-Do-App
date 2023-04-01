@@ -288,6 +288,7 @@ export default defineComponent({
         };
         this.$store.commit("addTaskList", newData);
         dataSource = Object.values(this.$store.state.taskList);
+        console.log(this.dataSource);
         // this.dataSource.unshift(newData);
         this.cacheData = this.dataSource.map((item) => ({ ...item }));
         this.task = "";

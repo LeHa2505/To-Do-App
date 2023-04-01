@@ -11,7 +11,7 @@ const store = () => {
 
       addTaskList(state, newData) {
         state.taskList.unshift(newData);
-        // console.log(state.taskList);
+        console.log(state.taskList);
       },
       updateArr(state, todo) {
 
