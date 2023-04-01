@@ -225,12 +225,6 @@ export default defineComponent({
     },
   },
   methods: {
-    // handleInputChange(e) {
-    //   this.checkNick = e.target.checked;
-    //   this.$nextTick(() => {
-    //     this.form.validateFields(["nickname"], { force: true });
-    //   });
-    // },
     showModal() {
       this.visible = true;
     },
@@ -248,8 +242,6 @@ export default defineComponent({
         return row["task"].toLowerCase().includes(value.toLowerCase());
       });
       this.changedData = searchData;
-      // this.dataSource = searchData;
-      // this.cacheData = newData.map((item) => ({ ...item }));
     },
     createUniqueKey() {
       let key;
@@ -269,6 +261,7 @@ export default defineComponent({
       if (target) {
         target[column] = value;
         this.dataSource = newData;
+        this.changedData = this.dataSource;
       }
       console.log(value + key + column);
     },
@@ -286,6 +279,7 @@ export default defineComponent({
         this.dataSource = newData;
         this.choiceSelected = "";
         this.dataSource = JSON.parse(localStorage.getItem("array") || "[]");
+        this.changedData = this.dataSource;
       }
     },
     edit(key, text, task) {
@@ -297,6 +291,7 @@ export default defineComponent({
       if (target) {
         target.editable = true;
         this.dataSource = newData;
+        this.changedData = this.dataSource;
       }
     },
     save(key) {
@@ -315,6 +310,7 @@ export default defineComponent({
       this.choiceSelected = "";
       this.updateLocalStorage(this.dataSource);
       this.dataSource = JSON.parse(localStorage.getItem("array") || "[]");
+      this.changedData = this.dataSource;
     },
     onDelete(key) {
       const newData = this.dataSource;
@@ -325,6 +321,7 @@ export default defineComponent({
       this.cacheData = dataSource.map((item) => ({ ...item }));
       this.editingKey = "";
       this.updateLocalStorage(this.dataSource);
+      this.changedData = this.dataSource;
     },
     handleAdd() {
       if (this.task) {
@@ -339,6 +336,7 @@ export default defineComponent({
         this.task = "";
       }
       this.updateLocalStorage(this.dataSource);
+      this.changedData = this.dataSource;
     },
   },
 });
