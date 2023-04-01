@@ -176,8 +176,6 @@ export default defineComponent({
         return row["task"].toLowerCase().includes(value.toLowerCase());
       });
       this.changedData = searchData;
-      // this.dataSource = searchData;
-      // this.cacheData = newData.map((item) => ({ ...item }));
     },
     createUniqueKey() {
       let key;
