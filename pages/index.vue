@@ -3,30 +3,68 @@
     <h1 style="text-align: center">NUXT TO DO APP</h1>
     <div style="display: flex; justify-content: center">
       <div class="block-task">
-        <a-input-group compact>
-          <a-input
-            v-model="task"
-            style="width: calc(100% - 100px)"
-            placeholder="Enter task ..."
-          />
-          <a-button style="width: 100px" type="primary" @click="handleAdd"
-            >Submit</a-button
-          >
-        </a-input-group>
-        <div
-          style="
-            margin-top: 1.5rem;
-            justify-content: space-between;
-            width: 50%;
-          "
-        >
+        <div style="justify-content: space-between; width: 40%">
           <a-input-search
             placeholder="Search task..."
-            style="width: 200px"
             v-model="search"
             @search="onSearch"
           />
         </div>
+        <template>
+          <div>
+            <a-button type="primary" @click="showModal"> Add task </a-button>
+            <a-modal
+              v-model="visible"
+              title="What needs to be done?"
+              @ok="handleOk"
+              okText="Add"
+            >
+              <a-form
+                :form="form"
+                :label-col="{ span: 4 }"
+                :wrapper-col="{ span: 12 }"
+              >
+                <a-form-item
+                  :label-col="formItemLayout.labelCol"
+                  :wrapper-col="formItemLayout.wrapperCol"
+                  label="Name"
+                >
+                  <a-input
+                    v-decorator="[
+                      'Task',
+                      {
+                        rules: [
+                          { required: true, message: 'Please input task name' },
+                        ],
+                      },
+                    ]"
+                    placeholder="Please input your task"
+                  />
+                </a-form-item>
+                <a-form-item
+                  :label-col="formItemLayout.labelCol"
+                  :wrapper-col="formItemLayout.wrapperCol"
+                  label="Status"
+                >
+                  <a-input
+                    v-decorator="[
+                      'status',
+                      {
+                        rules: [
+                          {
+                            required: true,
+                            message: 'Please choose status',
+                          },
+                        ],
+                      },
+                    ]"
+                    placeholder="Please choose status"
+                  />
+                </a-form-item>
+              </a-form>
+            </a-modal>
+          </div>
+        </template>
       </div>
     </div>
 
@@ -138,6 +176,14 @@ const columns = [
 ];
 
 const dataSource = [];
+const formItemLayout = {
+  labelCol: { span: 8 },
+  wrapperCol: { span: 12 },
+};
+const formTailLayout = {
+  labelCol: { span: 8 },
+  wrapperCol: { span: 12, offset: 8 },
+};
 
 export default defineComponent({
   components: {
@@ -151,36 +197,57 @@ export default defineComponent({
       columns,
       editingKey: "",
       task: "",
-      choiceList: ["to do", "done", "processing"],
+      choiceList: ["New", "Inprogress", "Done"],
       choiceSelected: "",
       usedKeys: [],
       textInput: "",
       search: "",
-      changedData: [], // changed data after filter 
+      changedData: [], // changed data after filter
       dataSource: [], // origin data
+      visible: false,
+      formItemLayout,
+      formTailLayout,
+      form: this.$form.createForm(this, { name: "dynamic_rule" }),
     };
   },
   mounted() {
-    this.dataSource = JSON.parse(localStorage.getItem("array") || "[]")
-    this.changedData = this.dataSource
+    this.dataSource = JSON.parse(localStorage.getItem("array") || "[]");
+    this.changedData = this.dataSource;
   },
   watch: {
     search(newData) {
       if (newData.length !== 0) {
         this.onSearch(newData);
-      }
-      else {
+      } else {
         // get origin data
-        this.changedData = this.dataSource
+        this.changedData = this.dataSource;
       }
-    }
+    },
   },
   methods: {
+    // handleInputChange(e) {
+    //   this.checkNick = e.target.checked;
+    //   this.$nextTick(() => {
+    //     this.form.validateFields(["nickname"], { force: true });
+    //   });
+    // },
+    showModal() {
+      this.visible = true;
+    },
+    handleOk(e) {
+      this.form.validateFields((err) => {
+        if (!err) {
+          console.info("success");
+          console.log(e);
+          this.visible = false;
+        }
+      });
+    },
     onSearch(value) {
       const searchData = this.dataSource.filter((row) => {
         return row["task"].toLowerCase().includes(value.toLowerCase());
       });
-      this.changedData = searchData
+      this.changedData = searchData;
       // this.dataSource = searchData;
       // this.cacheData = newData.map((item) => ({ ...item }));
     },
@@ -284,9 +351,8 @@ export default defineComponent({
 
 .block-task {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   margin-top: 1rem;
-  flex-direction: column;
   /* align-items: center; */
   width: 50%;
 }
