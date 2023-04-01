@@ -27,14 +27,18 @@
                 <a-form-item
                   :label-col="formItemLayout.labelCol"
                   :wrapper-col="formItemLayout.wrapperCol"
-                  label="Name"
+                  label="Task"
                 >
                   <a-input
+                    v-model="task"
                     v-decorator="[
-                      'Task',
+                      'task',
                       {
                         rules: [
                           { required: true, message: 'Please input task name' },
+                          {
+                            validator: handleConfirmTask,
+                          },
                         ],
                       },
                     ]"
@@ -42,11 +46,12 @@
                   />
                 </a-form-item>
                 <a-form-item
+                  label="Status"
                   :label-col="formItemLayout.labelCol"
                   :wrapper-col="formItemLayout.wrapperCol"
-                  label="Status"
                 >
-                  <a-input
+                  <a-select
+                    v-model="choiceSelected"
                     v-decorator="[
                       'status',
                       {
@@ -58,7 +63,31 @@
                         ],
                       },
                     ]"
-                    placeholder="Please choose status"
+                    placeholder="Select an option"
+                  >
+                    <a-select-option
+                      v-for="(text, index) in choiceList"
+                      :key="index"
+                      :value="text"
+                    >
+                      {{ text }}
+                    </a-select-option>
+                  </a-select>
+                </a-form-item>
+                <a-form-item
+                  :label-col="formItemLayout.labelCol"
+                  :wrapper-col="formItemLayout.wrapperCol"
+                  label="Note"
+                >
+                  <a-input
+                    v-model="note"
+                    v-decorator="[
+                      'note',
+                      {
+                        rules: [{ required: false }],
+                      },
+                    ]"
+                    placeholder="Note something about this task"
                   />
                 </a-form-item>
               </a-form>
@@ -69,10 +98,10 @@
     </div>
 
     <div class="task-list">
-      <div style="width: 50%">
+      <div style="width: 60%">
         <a-table :columns="columns" :data-source="changedData" bordered>
           <template
-            v-for="col in ['task', 'status']"
+            v-for="col in ['task', 'status', 'note']"
             :slot="col"
             slot-scope="text, record"
           >
@@ -82,6 +111,12 @@
                 style="margin: -5px 0"
                 v-model="textInput"
                 @change="(e) => handleChange(textInput, record.key, col)"
+              />
+              <a-input
+                v-else-if="record.editable && col === 'note'"
+                style="margin: -5px 0"
+                v-model="note"
+                @change="(e) => handleChange(note, record.key, col)"
               />
               <a-select
                 v-else-if="record.editable && col === 'status'"
@@ -118,7 +153,10 @@
               <span v-else>
                 <a
                   :disabled="editingKey !== ''"
-                  @click="() => edit(record.key, record.status, record.task)"
+                  @click="
+                    () =>
+                      edit(record.key, record.status, record.task, record.note)
+                  "
                   ><a-icon type="edit" theme="filled" style="font-size: 1.2rem"
                 /></a>
               </span>
@@ -155,13 +193,20 @@ const columns = [
   {
     title: "Task",
     dataIndex: "task",
-    width: "40%",
+    width: "30%",
     scopedSlots: { customRender: "task" },
   },
   {
     title: "Status",
     dataIndex: "status",
+    width: "15%",
     scopedSlots: { customRender: "status" },
+  },
+  {
+    title: "Note",
+    dataIndex: "note",
+    width: "20%",
+    scopedSlots: { customRender: "note" },
   },
   {
     title: "Edit",
@@ -191,12 +236,12 @@ export default defineComponent({
   },
   name: "IndexPage",
   data() {
-    // this.dataSource = JSON.parse(localStorage.getItem("array") || "[]");
     this.cacheData = dataSource.map((item) => ({ ...item }));
     return {
       columns,
       editingKey: "",
       task: "",
+      note: "",
       choiceList: ["New", "Inprogress", "Done"],
       choiceSelected: "",
       usedKeys: [],
@@ -225,14 +270,28 @@ export default defineComponent({
     },
   },
   methods: {
+    containsSpecialChars(str) {
+      const specialChars = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
+      return specialChars.test(str);
+    },
+    handleConfirmTask(rule, value, callback) {
+      if (containsSpecialChars(value) === false) {
+        callback("abc");
+      }
+      callback();
+    },
     showModal() {
       this.visible = true;
+      this.note = "";
+      this.task = "";
+      this.choiceSelected = "";
     },
     handleOk(e) {
       this.form.validateFields((err) => {
+        console.log(err);
         if (!err) {
+          this.handleAdd();
           console.info("success");
-          console.log(e);
           this.visible = false;
         }
       });
@@ -278,12 +337,14 @@ export default defineComponent({
         delete target.editable;
         this.dataSource = newData;
         this.choiceSelected = "";
+        this.note = "";
         this.dataSource = JSON.parse(localStorage.getItem("array") || "[]");
         this.changedData = this.dataSource;
       }
     },
-    edit(key, text, task) {
+    edit(key, text, task, note) {
       this.choiceSelected = text;
+      this.note = note;
       this.textInput = task;
       const newData = [...this.dataSource];
       const target = newData.find((item) => key === item.key);
@@ -308,6 +369,7 @@ export default defineComponent({
       console.log(target.editable);
       this.editingKey = "";
       this.choiceSelected = "";
+      this.note = "";
       this.updateLocalStorage(this.dataSource);
       this.dataSource = JSON.parse(localStorage.getItem("array") || "[]");
       this.changedData = this.dataSource;
@@ -328,12 +390,15 @@ export default defineComponent({
         const newData = {
           key: this.createUniqueKey(),
           task: this.task,
-          status: this.choiceList[0],
+          status: this.choiceSelected,
+          note: this.note,
           editable: false,
         };
         this.dataSource.unshift(newData);
         this.cacheData = dataSource.map((item) => ({ ...item }));
         this.task = "";
+        this.choiceSelected = "";
+        this.note = "";
       }
       this.updateLocalStorage(this.dataSource);
       this.changedData = this.dataSource;
@@ -352,7 +417,7 @@ export default defineComponent({
   justify-content: space-between;
   margin-top: 1rem;
   /* align-items: center; */
-  width: 50%;
+  width: 60%;
 }
 
 .task-list {
