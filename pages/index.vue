@@ -14,11 +14,7 @@
           >
         </a-input-group>
         <div
-          style="
-            margin-top: 1.5rem;
-            justify-content: space-between;
-            width: 50%;
-          "
+          style="margin-top: 1.5rem; justify-content: space-between; width: 50%"
         >
           <a-input-search
             placeholder="Search task..."
@@ -156,31 +152,30 @@ export default defineComponent({
       usedKeys: [],
       textInput: "",
       search: "",
-      changedData: [], // changed data after filter 
+      changedData: [], // changed data after filter
       dataSource: [], // origin data
     };
   },
   mounted() {
-    this.dataSource = JSON.parse(localStorage.getItem("array") || "[]")
-    this.changedData = this.dataSource
+    this.dataSource = JSON.parse(localStorage.getItem("array") || "[]");
+    this.changedData = this.dataSource;
   },
   watch: {
     search(newData) {
       if (newData.length !== 0) {
         this.onSearch(newData);
-      }
-      else {
+      } else {
         // get origin data
-        this.changedData = this.dataSource
+        this.changedData = this.dataSource;
       }
-    }
+    },
   },
   methods: {
     onSearch(value) {
       const searchData = this.dataSource.filter((row) => {
         return row["task"].toLowerCase().includes(value.toLowerCase());
       });
-      this.changedData = searchData
+      this.changedData = searchData;
       // this.dataSource = searchData;
       // this.cacheData = newData.map((item) => ({ ...item }));
     },
@@ -202,6 +197,7 @@ export default defineComponent({
       if (target) {
         target[column] = value;
         this.dataSource = newData;
+        this.changedData = this.dataSource;
       }
       console.log(value + key + column);
     },
@@ -219,6 +215,7 @@ export default defineComponent({
         this.dataSource = newData;
         this.choiceSelected = "";
         this.dataSource = JSON.parse(localStorage.getItem("array") || "[]");
+        this.changedData = this.dataSource;
       }
     },
     edit(key, text, task) {
@@ -230,6 +227,7 @@ export default defineComponent({
       if (target) {
         target.editable = true;
         this.dataSource = newData;
+        this.changedData = this.dataSource;
       }
     },
     save(key) {
@@ -248,6 +246,7 @@ export default defineComponent({
       this.choiceSelected = "";
       this.updateLocalStorage(this.dataSource);
       this.dataSource = JSON.parse(localStorage.getItem("array") || "[]");
+      this.changedData = this.dataSource;
     },
     onDelete(key) {
       const newData = this.dataSource;
@@ -258,6 +257,7 @@ export default defineComponent({
       this.cacheData = dataSource.map((item) => ({ ...item }));
       this.editingKey = "";
       this.updateLocalStorage(this.dataSource);
+      this.changedData = this.dataSource;
     },
     handleAdd() {
       if (this.task) {
@@ -272,6 +272,7 @@ export default defineComponent({
         this.task = "";
       }
       this.updateLocalStorage(this.dataSource);
+      this.changedData = this.dataSource;
     },
   },
 });
