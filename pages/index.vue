@@ -125,7 +125,6 @@
 <script>
 import CopyOutlined from "@ant-design/icons-vue";
 import { computed, defineComponent, reactive, ref } from "vue";
-import { mapState, mapGetters, mapActions, mapMutations } from "vuex";
 
 const columns = [
   {
