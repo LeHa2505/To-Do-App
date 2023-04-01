@@ -2,7 +2,11 @@ import Vuex from 'vuex'
 const store = () => {
   return new Vuex.Store({
     state: {
-      taskList: [],
+      taskList: [
+        {key: 942, task: "adad", status: "Inprogress", note: "adad", editable: false},
+        {key: 940, task: "adad", status: "Inprogress", note: "adad", editable: false},
+        {key: 941, task: "adad", status: "Inprogress", note: "adad", editable: false},
+      ],
     },
     mutations: {
       setArr(state, arr) {

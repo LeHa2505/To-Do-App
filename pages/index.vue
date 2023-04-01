@@ -174,13 +174,21 @@ export default defineComponent({
       usedKeys: [],
       textInput: "",
       search: "",
-      changedData: [], // changed data after filter
-      dataSource: [], // origin data
+      // changedData: [], // changed data after filter
+      // dataSource: [], // origin data
     };
   },
   created() {
-    dataSource = Object.values(this.$store.state.taskList);
-    console.log(dataSource);
+    // dataSource = Object.values(this.$store.state.taskList);
+    // console.log(dataSource);
+  },
+  computed: {
+    dataSource() {
+      return this.$store.state.taskList;
+    },
+    changedData () {
+      return this.dataSource;
+    }
   },
   mounted() {
     // this.dataSource = JSON.parse(localStorage.getItem("array") || "[]");
