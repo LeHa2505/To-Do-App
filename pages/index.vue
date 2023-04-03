@@ -16,12 +16,35 @@
     </div>
     <div style="display: flex; justify-content: center">
       <div class="block-task">
-        <div style="justify-content: space-between; width: 30%">
+        <div
+          style="
+            justify-content: space-between;
+            width: 30%;
+            padding-right: 1rem;
+          "
+        >
           <a-input-search
             placeholder="Search task..."
             v-model="search"
-            @search="onSearch"
+            @search="onSearch(search, 'task')"
           />
+        </div>
+        <div style="padding-right: 1rem; width: 18%">
+          <a-select
+            style="width: 100%"
+            placeholder="Filter status"
+            v-model="selectedItem"
+            @change="onSearch(selectedItem, 'status')"
+          >
+            <a-select-option
+              v-for="(choice, index) in choiceList"
+              :key="index"
+              :value="choice"
+            >
+              {{ choice }}
+            </a-select-option>
+            <a-select-option value="all"> ALL </a-select-option>
+          </a-select>
         </div>
       </div>
     </div>
@@ -64,9 +87,17 @@
               <template v-else>
                 <a-tag
                   v-if="col === 'status'"
-                  :color="text === 'Inprogress' ? 'green' : text === 'Done' ? 'blue' : text === 'New' ? 'cyan' : ''">
+                  :color="
+                    text === 'Inprogress'
+                      ? 'green'
+                      : text === 'Done'
+                      ? 'blue'
+                      : text === 'New'
+                      ? 'red'
+                      : ''
+                  "
+                >
                   {{ text }}
-
                 </a-tag>
                 <p v-else>
                   {{ text }}
@@ -178,6 +209,7 @@ export default defineComponent({
       changedData: [], // changed data after filter
       dataSource: [], // origin data
       visible: false,
+      selectedItem: "",
     };
   },
   mounted() {
@@ -187,7 +219,7 @@ export default defineComponent({
   watch: {
     search(newData) {
       if (newData.length !== 0) {
-        this.onSearch(newData);
+        this.onSearch(newData, "task");
       } else {
         // get origin data
         this.changedData = this.dataSource;
@@ -200,6 +232,7 @@ export default defineComponent({
     },
     handleCancel() {
       this.visible = false;
+      this.$refs.collectionForm.form.resetFields();
     },
     handleCreate() {
       const form = this.$refs.collectionForm.form;
@@ -228,11 +261,21 @@ export default defineComponent({
         }
       });
     },
-    onSearch(value) {
-      const searchData = this.dataSource.filter((row) => {
-        return row["task"].toLowerCase().includes(value.toLowerCase());
-      });
-      this.changedData = searchData;
+    onSearch(value, col) {
+      if (value === "all" && col === "status") {
+        this.changedData = this.dataSource;
+      }
+      else if (this.selectedItem && this.search) {
+         const searchDataStatus = this.changedData.filter((row) => {
+          return row["task"]?.toLowerCase().includes(this.search.toLowerCase())&&row["status"]?.toLowerCase().includes(this.selectedItem.toLowerCase());
+        });
+        this.changedData = searchDataStatus;
+      } else {
+        const searchData = this.dataSource.filter((row) => {
+          return row[col]?.toLowerCase().includes(value.toLowerCase());
+        });
+        this.changedData = searchData;
+      }
     },
     createUniqueKey() {
       let key;
@@ -340,7 +383,7 @@ export default defineComponent({
 }
 .block-task {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   margin-top: 1rem;
   /* align-items: center; */
   width: 60%;
