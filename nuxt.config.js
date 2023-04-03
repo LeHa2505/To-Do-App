@@ -2,6 +2,12 @@ export default {
   // Disable server-side rendering: https://go.nuxtjs.dev/ssr-mode
   ssr: false,
 
+  //Access with: http://127.0.0.1:5500
+  // server: {
+  //   host: '127.0.0.1', // thay your-hostname bằng tên miền hoặc địa chỉ IP của server mới
+  //   port: '5500' // thay your-port bằng cổng mà bạn muốn server lắng nghe, ví dụ: 3000
+  // },
+
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
     title: 'to-do-app',

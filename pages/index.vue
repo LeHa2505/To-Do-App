@@ -215,6 +215,10 @@ export default defineComponent({
   mounted() {
     this.dataSource = JSON.parse(localStorage.getItem("array") || "[]");
     this.changedData = this.dataSource;
+    const element = document.getElementsByClassName(
+      "ant-select-selection__placeholder"
+    )[0];
+    element.style.display = "contents";
   },
   watch: {
     search(newData) {
@@ -264,10 +268,14 @@ export default defineComponent({
     onSearch(value, col) {
       if (value === "all" && col === "status") {
         this.changedData = this.dataSource;
-      }
-      else if (this.selectedItem && this.search) {
-         const searchDataStatus = this.changedData.filter((row) => {
-          return row["task"]?.toLowerCase().includes(this.search.toLowerCase())&&row["status"]?.toLowerCase().includes(this.selectedItem.toLowerCase());
+      } else if (this.selectedItem && this.search) {
+        const searchDataStatus = this.changedData.filter((row) => {
+          return (
+            row["task"]?.toLowerCase().includes(this.search.toLowerCase()) &&
+            row["status"]
+              ?.toLowerCase()
+              .includes(this.selectedItem.toLowerCase())
+          );
         });
         this.changedData = searchDataStatus;
       } else {
