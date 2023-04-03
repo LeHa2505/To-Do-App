@@ -1,99 +1,28 @@
 <template>
   <div>
     <h1 style="text-align: center">NUXT TO DO APP</h1>
+    <div class="addTaskBtn">
+      <template>
+        <div>
+          <a-button type="primary" @click="showModal"> Add Task </a-button>
+          <collection-create-form
+            ref="collectionForm"
+            :visible="visible"
+            @cancel="handleCancel"
+            @create="handleCreate"
+          />
+        </div>
+      </template>
+    </div>
     <div style="display: flex; justify-content: center">
       <div class="block-task">
-        <div style="justify-content: space-between; width: 40%">
+        <div style="justify-content: space-between; width: 30%">
           <a-input-search
             placeholder="Search task..."
             v-model="search"
             @search="onSearch"
           />
         </div>
-        <template>
-          <div>
-            <a-button type="primary" @click="showModal"> Add task </a-button>
-            <a-modal
-              v-model="visible"
-              title="What needs to be done?"
-              @ok="handleOk"
-              okText="Add"
-            >
-              <a-form
-                :form="form"
-                :label-col="{ span: 4 }"
-                :wrapper-col="{ span: 12 }"
-              >
-                <a-form-item
-                  :label-col="formItemLayout.labelCol"
-                  :wrapper-col="formItemLayout.wrapperCol"
-                  label="Task"
-                >
-                  <a-input
-                    v-model="task"
-                    v-decorator="[
-                      'task',
-                      {
-                        rules: [
-                          { required: true, message: 'Please input task name' },
-                          {
-                            validator: handleConfirmTask,
-                          },
-                        ],
-                      },
-                    ]"
-                    placeholder="Please input your task"
-                  />
-                </a-form-item>
-                <a-form-item
-                  label="Status"
-                  :label-col="formItemLayout.labelCol"
-                  :wrapper-col="formItemLayout.wrapperCol"
-                >
-                  <a-select
-                    v-model="choiceSelected"
-                    v-decorator="[
-                      'status',
-                      {
-                        rules: [
-                          {
-                            required: true,
-                            message: 'Please choose status',
-                          },
-                        ],
-                      },
-                    ]"
-                    placeholder="Select an option"
-                  >
-                    <a-select-option
-                      v-for="(text, index) in choiceList"
-                      :key="index"
-                      :value="text"
-                    >
-                      {{ text }}
-                    </a-select-option>
-                  </a-select>
-                </a-form-item>
-                <a-form-item
-                  :label-col="formItemLayout.labelCol"
-                  :wrapper-col="formItemLayout.wrapperCol"
-                  label="Note"
-                >
-                  <a-input
-                    v-model="note"
-                    v-decorator="[
-                      'note',
-                      {
-                        rules: [{ required: false }],
-                      },
-                    ]"
-                    placeholder="Note something about this task"
-                  />
-                </a-form-item>
-              </a-form>
-            </a-modal>
-          </div>
-        </template>
       </div>
     </div>
 
@@ -133,7 +62,13 @@
                 </a-select-option>
               </a-select>
               <template v-else>
-                <p>
+                <a-tag
+                  v-if="col === 'status'"
+                  :color="text === 'Inprogress' ? 'green' : text === 'Done' ? 'blue' : text === 'New' ? 'cyan' : ''">
+                  {{ text }}
+
+                </a-tag>
+                <p v-else>
                   {{ text }}
                 </p>
               </template>
@@ -188,7 +123,7 @@
 <script>
 import CopyOutlined from "@ant-design/icons-vue";
 import { computed, defineComponent, reactive, ref } from "vue";
-
+import CollectionCreateFormVue from "../components/CollectionCreateForm.vue";
 const columns = [
   {
     title: "Task",
@@ -199,7 +134,7 @@ const columns = [
   {
     title: "Status",
     dataIndex: "status",
-    width: "15%",
+    width: "18%",
     scopedSlots: { customRender: "status" },
   },
   {
@@ -221,18 +156,11 @@ const columns = [
 ];
 
 const dataSource = [];
-const formItemLayout = {
-  labelCol: { span: 8 },
-  wrapperCol: { span: 12 },
-};
-const formTailLayout = {
-  labelCol: { span: 8 },
-  wrapperCol: { span: 12, offset: 8 },
-};
 
 export default defineComponent({
   components: {
     CopyOutlined,
+    CollectionCreateFormVue,
   },
   name: "IndexPage",
   data() {
@@ -250,9 +178,6 @@ export default defineComponent({
       changedData: [], // changed data after filter
       dataSource: [], // origin data
       visible: false,
-      formItemLayout,
-      formTailLayout,
-      form: this.$form.createForm(this, { name: "dynamic_rule" }),
     };
   },
   mounted() {
@@ -270,21 +195,28 @@ export default defineComponent({
     },
   },
   methods: {
-    containsSpecialChars(str) {
-      const specialChars = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
-      return specialChars.test(str);
-    },
-    handleConfirmTask(rule, value, callback) {
-      if (containsSpecialChars(value) === false) {
-        callback("abc");
-      }
-      callback();
-    },
     showModal() {
       this.visible = true;
-      this.note = "";
-      this.task = "";
-      this.choiceSelected = "";
+    },
+    handleCancel() {
+      this.visible = false;
+    },
+    handleCreate() {
+      const form = this.$refs.collectionForm.form;
+      form.validateFields((err, values) => {
+        if (err) {
+          return;
+        }
+        console.log(
+          "Received values of form: ",
+          values.note,
+          values.task,
+          values.status
+        );
+        this.handleAdd(values.task, values.status, values.note);
+        form.resetFields();
+        this.visible = false;
+      });
     },
     handleOk(e) {
       this.form.validateFields((err) => {
@@ -385,21 +317,16 @@ export default defineComponent({
       this.updateLocalStorage(this.dataSource);
       this.changedData = this.dataSource;
     },
-    handleAdd() {
-      if (this.task) {
-        const newData = {
-          key: this.createUniqueKey(),
-          task: this.task,
-          status: this.choiceSelected,
-          note: this.note,
-          editable: false,
-        };
-        this.dataSource.unshift(newData);
-        this.cacheData = dataSource.map((item) => ({ ...item }));
-        this.task = "";
-        this.choiceSelected = "";
-        this.note = "";
-      }
+    handleAdd(task, status, note) {
+      const newData = {
+        key: this.createUniqueKey(),
+        task: task,
+        status: status,
+        note: note,
+        editable: false,
+      };
+      this.dataSource.unshift(newData);
+      this.cacheData = dataSource.map((item) => ({ ...item }));
       this.updateLocalStorage(this.dataSource);
       this.changedData = this.dataSource;
     },
@@ -411,7 +338,6 @@ export default defineComponent({
 .editable-row-operations a {
   margin-right: 8px;
 }
-
 .block-task {
   display: flex;
   justify-content: space-between;
@@ -419,14 +345,19 @@ export default defineComponent({
   /* align-items: center; */
   width: 60%;
 }
-
 .task-list {
   display: flex;
   justify-content: center;
   margin-top: 1rem;
 }
-
 .strikethrough {
   text-decoration: line-through;
+}
+
+.addTaskBtn {
+  display: flex;
+  justify-content: flex-end;
+  width: 80%;
+  margin-top: 2rem;
 }
 </style>
