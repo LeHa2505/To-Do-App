@@ -215,14 +215,14 @@ export default defineComponent({
   mounted() {
     this.dataSource = JSON.parse(localStorage.getItem("array") || "[]");
     this.changedData = this.dataSource;
-    const element = document.getElementsByClassName(
-      "ant-select-selection__placeholder"
-    )[0];
-    element.style.display = "contents";
+    // const element = document.getElementsByClassName(
+    //   "ant-select-selection__placeholder"
+    // )[0];
+    // element.style.display = "contents";
   },
   watch: {
     search(newData) {
-      if (newData.length !== 0) {
+      if (newData) {
         this.onSearch(newData, "task");
       } else {
         // get origin data
@@ -242,14 +242,9 @@ export default defineComponent({
       const form = this.$refs.collectionForm.form;
       form.validateFields((err, values) => {
         if (err) {
+          console.log(err);
           return;
         }
-        console.log(
-          "Received values of form: ",
-          values.note,
-          values.task,
-          values.status
-        );
         this.handleAdd(values.task, values.status, values.note);
         form.resetFields();
         this.visible = false;
@@ -257,10 +252,8 @@ export default defineComponent({
     },
     handleOk(e) {
       this.form.validateFields((err) => {
-        console.log(err);
         if (!err) {
           this.handleAdd();
-          console.info("success");
           this.visible = false;
         }
       });
