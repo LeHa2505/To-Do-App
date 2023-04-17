@@ -25,6 +25,10 @@ p {
   line-height: 1.4em;
 }
 
+.error {
+  color: #f5222d;
+}
+
 /* .page-enter-active {
     animation: bounce-in .8s;
   }

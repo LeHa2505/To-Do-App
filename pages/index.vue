@@ -5,12 +5,90 @@
       <template>
         <div>
           <a-button type="primary" @click="showModal"> Add Task </a-button>
-          <collection-create-form
-            ref="collectionForm"
-            :visible="visible"
-            @cancel="handleCancel"
-            @create="handleCreate"
-          />
+          <a-modal
+            v-model="visible"
+            title="What needs to be done?"
+            @ok="handleOk"
+          >
+            <a-form layout="vertical" :form="form">
+              <p
+                class="typo__p"
+                style="color: #f5222d"
+                v-if="submitStatus === 'OK'"
+              >
+                Thanks for your submission!
+              </p>
+              <p
+                class="typo__p"
+                style="color: #f5222d"
+                v-if="submitStatus === 'ERROR'"
+              >
+                Please fill the form correctly.
+              </p>
+              <p
+                class="typo__p"
+                style="color: #f5222d"
+                v-if="submitStatus === 'PENDING'"
+              >
+                Sending...
+              </p>
+              <a-form-item
+                label="Task"
+                :validate-status="
+                  !$v.task.required || !$v.task.alpha ? 'error' : 'success'
+                "
+              >
+                <a-input
+                  v-model.trim="$v.task.$model"
+                  placeholder="Enter task"
+                  :class="
+                    !$v.task.required || !$v.task.alpha ? 'error' : 'success'
+                  "
+                  @input="handleInput('task')"
+                />
+                <div
+                  class="error"
+                  style="color: #f5222d"
+                  v-if="!$v.task.required"
+                >
+                  Name is required
+                </div>
+                <div class="error" style="color: #f5222d" v-if="!$v.task.alpha">
+                  Name cannot contain special characters!
+                </div>
+              </a-form-item>
+
+              <a-form-item
+                label="Status"
+                :validate-status="
+                  !$v.choiceSelected.required ? 'error' : 'success'
+                "
+              >
+                <a-select
+                  v-model.trim="$v.choiceSelected.$model"
+                  placeholder="Select status"
+                >
+                  <a-select-option
+                    v-for="(choice, index) in choiceList"
+                    :key="index"
+                    :value="choice"
+                  >
+                    {{ choice }}
+                  </a-select-option>
+                </a-select>
+                <div
+                  class="error"
+                  style="color: #f5222d"
+                  v-if="!$v.choiceSelected.required"
+                >
+                  Status is required
+                </div>
+              </a-form-item>
+              <a-form-item label="Note">
+                <a-input type="textarea" v-model="note" />
+              </a-form-item>
+            </a-form>
+          </a-modal>
         </div>
       </template>
     </div>
@@ -155,6 +233,8 @@
 import CopyOutlined from "@ant-design/icons-vue";
 import { computed, defineComponent, reactive, ref } from "vue";
 import CollectionCreateFormVue from "../components/CollectionCreateForm.vue";
+import { required } from "vuelidate/lib/validators";
+import { helpers } from "vuelidate/lib/validators";
 const columns = [
   {
     title: "Task",
@@ -188,6 +268,8 @@ const columns = [
 
 const dataSource = [];
 
+const alpha = helpers.regex("alpha", /^[\p{L}\p{N}\s]+$/u);
+
 export default defineComponent({
   components: {
     CopyOutlined,
@@ -210,7 +292,19 @@ export default defineComponent({
       dataSource: [], // origin data
       visible: false,
       selectedItem: "",
+      formLayout: "horizontal",
+      form: this.$form.createForm(this, { name: "coordinated" }),
+      submitStatus: null,
     };
+  },
+  validations: {
+    task: {
+      required,
+      alpha,
+    },
+    choiceSelected: {
+      required,
+    },
   },
   mounted() {
     this.dataSource = JSON.parse(localStorage.getItem("array") || "[]");
@@ -231,6 +325,9 @@ export default defineComponent({
     },
   },
   methods: {
+    handleInput(field) {
+    this.$v.$touch(field);
+    },
     showModal() {
       this.visible = true;
     },
@@ -238,25 +335,21 @@ export default defineComponent({
       this.visible = false;
       this.$refs.collectionForm.form.resetFields();
     },
-    handleCreate() {
-      const form = this.$refs.collectionForm.form;
-      form.validateFields((err, values) => {
-        if (err) {
-          console.log(err);
-          return;
-        }
-        this.handleAdd(values.task, values.status, values.note);
-        form.resetFields();
-        this.visible = false;
-      });
-    },
     handleOk(e) {
-      this.form.validateFields((err) => {
-        if (!err) {
-          this.handleAdd();
+      this.$v.$touch();
+      if (this.$v.$invalid) {
+        this.submitStatus = "ERROR";
+      } else {
+        this.submitStatus = "PENDING";
+        setTimeout(() => {
+          this.submitStatus = "OK";
+          this.handleAdd(this.task, this.choiceSelected, this.note);
+          this.task = "";
+          this.choiceSelected = "";
+          this.note = "";
           this.visible = false;
-        }
-      });
+        }, 500);
+      }
     },
     onSearch(value, col) {
       if (value === "all" && col === "status") {
@@ -298,12 +391,10 @@ export default defineComponent({
         this.dataSource = newData;
         this.changedData = this.dataSource;
       }
-      console.log(value + key + column);
     },
     cancel(key) {
       const newData = [...this.dataSource];
       const target = newData.find((item) => key === item.key);
-      console.log(target);
       this.editingKey = "";
       if (target) {
         Object.assign(
@@ -342,7 +433,6 @@ export default defineComponent({
         this.cacheData = newCacheData;
       }
       target.editable = false;
-      console.log(target.editable);
       this.editingKey = "";
       this.choiceSelected = "";
       this.note = "";
@@ -403,5 +493,11 @@ export default defineComponent({
   justify-content: flex-end;
   width: 80%;
   margin-top: 2rem;
+}
+
+.invalid {
+  border-color: #f5222d;
+  /* --antd-wave-shadow-color: #f5222d; */
+  box-shadow: 0 0 4px rgba(245, 34, 45, 0.2);
 }
 </style>
