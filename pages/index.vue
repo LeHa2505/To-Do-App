@@ -1,10 +1,19 @@
 <template>
   <div>
-    <h1 style="text-align: center">NUXT TO DO APP</h1>
+    <a
+      href="#"
+      v-for="locale in availableLocales"
+      :key="locale.code"
+      @click.prevent.stop="$i18n.setLocale(locale.code)"
+      >{{ locale.name }}</a
+    >
+    <h1 style="text-align: center">{{ $t("to_do_app_nuxt") }}</h1>
     <div class="addTaskBtn">
       <template>
         <div>
-          <a-button type="primary" @click="showModal"> Add Task </a-button>
+          <a-button type="primary" @click="showModal">
+            {{ $t("add_task") }}
+          </a-button>
           <a-modal
             v-model="visible"
             title="What needs to be done?"
@@ -44,7 +53,7 @@
                   :class="
                     !$v.task.required || !$v.task.alpha ? 'error' : 'success'
                   "
-                  @input="handleInput('task')"
+                  @input="handleInput($v.task)"
                 />
                 <div
                   class="error"
@@ -57,7 +66,6 @@
                   Name cannot contain special characters!
                 </div>
               </a-form-item>
-
               <a-form-item
                 label="Status"
                 :validate-status="
@@ -102,7 +110,7 @@
           "
         >
           <a-input-search
-            placeholder="Search task..."
+            :placeholder="$t('search_task')"
             v-model="search"
             @search="onSearch(search, 'task')"
           />
@@ -235,6 +243,7 @@ import { computed, defineComponent, reactive, ref } from "vue";
 import CollectionCreateFormVue from "../components/CollectionCreateForm.vue";
 import { required } from "vuelidate/lib/validators";
 import { helpers } from "vuelidate/lib/validators";
+
 const columns = [
   {
     title: "Task",
@@ -269,6 +278,8 @@ const columns = [
 const dataSource = [];
 
 const alpha = helpers.regex("alpha", /^[\p{L}\p{N}\s]+$/u);
+
+const touchMap = new WeakMap();
 
 export default defineComponent({
   components: {
@@ -306,6 +317,11 @@ export default defineComponent({
       required,
     },
   },
+  computed: {
+    availableLocales() {
+      return this.$i18n.locales.filter((i) => i.code !== this.$i18n.locale);
+    },
+  },
   mounted() {
     this.dataSource = JSON.parse(localStorage.getItem("array") || "[]");
     this.changedData = this.dataSource;
@@ -317,7 +333,8 @@ export default defineComponent({
   watch: {
     search(newData) {
       if (newData) {
-        this.onSearch(newData, "task");
+        let filteredNewData = newData.replace(/^\s+|\s+$/gm, "");
+        this.onSearch(filteredNewData, "task");
       } else {
         // get origin data
         this.changedData = this.dataSource;
@@ -325,8 +342,8 @@ export default defineComponent({
     },
   },
   methods: {
-    handleInput(field) {
-    this.$v.$touch(field);
+    handleInput($v) {
+      this.$v.$touch();
     },
     showModal() {
       this.visible = true;

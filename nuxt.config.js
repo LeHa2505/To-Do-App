@@ -27,7 +27,10 @@ export default {
   css: ["ant-design-vue/dist/antd.css"],
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
-  plugins: ["@/plugins/antd-ui", {src: '~/plugins/Vuelidate'}],
+  plugins: [
+    "@/plugins/antd-ui",  
+    { src: "~/plugins/Vuelidate" },
+  ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
   components: true,
@@ -39,8 +42,24 @@ export default {
   modules: ["@nuxtjs/i18n"],
   i18n: {
     /* module options */
+    // skipSettingLocaleOnNavigate: true,
+    locales: [
+      {
+        code: "en",
+        name: "English",
+        iso: "en",
+        file: "en.json",
+      },
+      {
+        code: "vi",
+        name: "Vietnamese",
+        iso: "vi",
+        file: "vi.json",
+      },
+    ],
+    langDir: 'lang',
+    defaultLocale: 'en',
   },
-
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {},
 };

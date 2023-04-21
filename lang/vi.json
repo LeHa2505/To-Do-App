@@ -1,0 +1,13 @@
+{
+  "add_task": "Thêm công việc",
+  "to_do_app_nuxt": "Phần mềm quản lý công việc",
+  "task": "Công việc",
+  "status": "Trạng thái",
+  "note": "Ghi chú",
+  "edit": "Chỉnh sửa",
+  "delete": "Xóa",
+  "inprogress": "Đang thực hiện",
+  "done": "Đã hoàn thành",
+  "new": "Mới",
+  "search_task": "Tìm kiếm công việc"
+}

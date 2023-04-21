@@ -8,9 +8,18 @@
         mode="horizontal"
         :style="{ lineHeight: '64px' }"
       >
-        <a-menu-item key="1">nav 1</a-menu-item>
-        <a-menu-item key="2">nav 2</a-menu-item>
-        <a-menu-item key="3">nav 3</a-menu-item>  
+        <nuxt-link to="/en" key="1">Main</nuxt-link>
+        <!-- <nuxt-link :to="switchLocalePath('vi')" key="2">VN</nuxt-link>
+        <nuxt-link :to="switchLocalePath('en')" key="3">English</nuxt-link> -->
+        <!-- <a-menu-item key="2">nav 2</a-menu-item>
+        <a-menu-item key="3">nav 3</a-menu-item>   -->
+        <!-- <a-menu-item
+          href="#"
+          v-for="locale in availableLocales"
+          :key="locale.code"
+          @click.prevent.stop="$i18n.setLocale(locale.code)"
+          >{{ locale.name }}</a-menu-item
+        > -->
       </a-menu>
     </a-layout-header>
     <a-layout-content style="padding: 0 50px">
@@ -20,7 +29,7 @@
         <a-breadcrumb-item>App</a-breadcrumb-item>
       </a-breadcrumb>
       <div :style="{ background: '#fff', padding: '24px', minHeight: '280px' }">
-        <Nuxt/>
+        <Nuxt />
       </div>
     </a-layout-content>
     <a-layout-footer style="text-align: center">
@@ -28,7 +37,6 @@
     </a-layout-footer>
   </a-layout>
 </template>
-
 
 <script>
 import { defineComponent, ref } from "vue";

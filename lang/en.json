@@ -1,0 +1,14 @@
+{
+  "add_task": "Add task",
+  "to_do_app_nuxt": "APP TO DO NUXT",
+  "task": "task",
+  "status": "status",
+  "note": "note",
+  "edit": "edit",
+  "delete": "delete",
+  "inprogress": "Inprogress",
+  "done": "Done",
+  "new": "New",
+  "search_task": "Search task"
+
+}
