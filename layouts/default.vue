@@ -8,7 +8,7 @@
         mode="horizontal"
         :style="{ lineHeight: '64px' }"
       >
-        <nuxt-link to="/en" key="1">Main</nuxt-link>
+        <nuxt-link to="" key="1">Main</nuxt-link>
         <!-- <nuxt-link :to="switchLocalePath('vi')" key="2">VN</nuxt-link>
         <nuxt-link :to="switchLocalePath('en')" key="3">English</nuxt-link> -->
         <!-- <a-menu-item key="2">nav 2</a-menu-item>

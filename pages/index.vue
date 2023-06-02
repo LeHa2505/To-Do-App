@@ -246,7 +246,7 @@ import { helpers } from "vuelidate/lib/validators";
 
 const columns = [
   {
-    title: "Task",
+    title: "task",
     dataIndex: "task",
     width: "30%",
     scopedSlots: { customRender: "task" },
@@ -325,6 +325,8 @@ export default defineComponent({
   mounted() {
     this.dataSource = JSON.parse(localStorage.getItem("array") || "[]");
     this.changedData = this.dataSource;
+    if (!this.$i18n) return;
+    console.log(this.$i18n);
     // const element = document.getElementsByClassName(
     //   "ant-select-selection__placeholder"
     // )[0];
